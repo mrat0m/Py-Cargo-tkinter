@@ -44,7 +44,7 @@ window.geometry("400x300")  # Width x Height
 heading_label = tk.Label(window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
 heading_label.pack(pady=20)
 
-# Create labels, entry fields and login button
+# Create labels, entry fields, and login button
 username_label = tk.Label(window, text="Username:")
 username_label.pack()
 
