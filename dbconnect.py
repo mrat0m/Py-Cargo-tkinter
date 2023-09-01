@@ -1,43 +1,44 @@
-import mysql.connector
+import mysql.connector as mc
 
+# password = "root"
 password = ""
 database = "cargo_database"
 
 def select(q, values):
-    cnx = mysql.connector.connect(user="root", password=password, host="localhost", database=database)
-    cur = cnx.cursor(dictionary=True)
+    c = mc.connect(user="root", password=password, host="localhost", database=database)
+    cur = c.cursor(dictionary=True)
     cur.execute(q, values)  # Pass values to the execute method
     result = cur.fetchall()
     cur.close()
-    cnx.close()
+    c.close()
     return result
 
 def update(q):
-    cnx = mysql.connector.connect(user="root", password=password, host="localhost", database=database)
-    cur = cnx.cursor(dictionary=True)
+    c = mc.connect(user="root", password=password, host="localhost", database=database)
+    cur = c.cursor(dictionary=True)
     cur.execute(q)
     cnx.commit()
     result = cur.rowcount
     cur.close()
-    cnx.close()
+    c.close()
     return result
 
 def delete(q):
-    cnx = mysql.connector.connect(user="root", password=password, host="localhost", database=database)
-    cur = cnx.cursor(dictionary=True)
+    c = mc.connect(user="root", password=password, host="localhost", database=database)
+    cur = c.cursor(dictionary=True)
     cur.execute(q)
-    cnx.commit()
+    c.commit()
     result = cur.rowcount
-    cur.close()
-    cnx.close()
+    c.close()
+    c.close()
     return result
 
 def insert(q, values):
-    cnx = mysql.connector.connect(user="root", password=password, host="localhost", database=database)
-    cur = cnx.cursor(dictionary=True)
+    c = mc.connect(user="root", password=password, host="localhost", database=database)
+    cur = c.cursor(dictionary=True)
     cur.execute(q, values)
-    cnx.commit()
+    c.commit()
     result = cur.lastrowid
     cur.close()
-    cnx.close()
+    c.close()
     return result

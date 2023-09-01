@@ -44,6 +44,10 @@ register_window.title("Quick Cargo | Customer Registration")
 # Set window size
 register_window.geometry("400x400")  # Width x Height
 
+# Add a stylish heading
+heading_label = tk.Label(register_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
+heading_label.pack(pady=15)
+
 # Create labels, entry fields, and register button
 username_label = tk.Label(register_window, text="Username:")
 username_label.pack()

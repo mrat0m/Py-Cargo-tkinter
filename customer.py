@@ -28,6 +28,10 @@ customer_window.title("Quick Cargo | Customer Panel")
 # Set window size
 customer_window.geometry("400x300")  # Width x Height
 
+# Add a stylish heading
+heading_label = tk.Label(customer_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
+heading_label.pack(pady=15)
+
 # Create a frame for the header (top row)
 header_frame = tk.Frame(customer_window)
 header_frame.pack(side="top", fill="x")
