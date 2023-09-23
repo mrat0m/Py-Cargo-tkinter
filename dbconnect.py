@@ -42,3 +42,26 @@ def insert(q, values):
     cur.close()
     c.close()
     return result
+# Customer ID Fecth code
+def get_customer_id(username):
+    try:
+        connection = mc.connect(user="root", password=password, host="localhost", database=database)
+        cursor = connection.cursor(dictionary=True)
+
+        query = "SELECT customer_id FROM customers WHERE username = %s"
+        cursor.execute(query, (username,))
+        result = cursor.fetchone()
+
+        if result:
+            return result['customer_id']
+        else:
+            return None
+
+    except mc.Error as error:
+        print(f"Error: {error}")
+        return None
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
