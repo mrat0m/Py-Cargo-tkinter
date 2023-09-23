@@ -14,12 +14,11 @@ def manage_packages():
 
 # Function to open the Manage Cargo window
 def manage_cargo():
-    messagebox.showinfo("Action Successful", "Redirecting to managecargo page")
     admin_window.destroy()  # Close the admin window
     subprocess.run(["python", "managecargo.py", username])  # Run managecargo.py using subprocess
 
 # Function to open the all bookings window
-def all_bookings():
+def view_all_bookings():
     messagebox.showinfo("Action Successful", "Redirecting to allbookings page")
     admin_window.destroy()  # Close the admin window
     subprocess.run(["python", "allbookings.py", username])  # Run allbookings.py using subprocess
@@ -28,7 +27,6 @@ def all_bookings():
 def logout():
     admin_window.destroy()  # Close the admin window
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
-
 
 # Create the Admin GUI window
 admin_window = tk.Tk()
@@ -68,7 +66,7 @@ manage_cargo_button = tk.Button(
 manage_cargo_button.pack(side="top", pady=10)
 
 reports_button = tk.Button(
-    content_frame, text="All Bookings", command=all_bookings)
+    content_frame, text="All Bookings", command=view_all_bookings)
 reports_button.pack(side="top", pady=10)
 
 # Start the GUI event loop for the admin window

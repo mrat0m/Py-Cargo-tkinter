@@ -17,7 +17,7 @@ def update(q):
     c = mc.connect(user="root", password=password, host="localhost", database=database)
     cur = c.cursor(dictionary=True)
     cur.execute(q)
-    cnx.commit()
+    c.commit()  # Commit the changes using the database connection 'c'
     result = cur.rowcount
     cur.close()
     c.close()
@@ -27,7 +27,7 @@ def delete(q):
     c = mc.connect(user="root", password=password, host="localhost", database=database)
     cur = c.cursor(dictionary=True)
     cur.execute(q)
-    c.commit()
+    c.commit()  # Commit the changes using the database connection 'c'
     result = cur.rowcount
     c.close()
     c.close()
@@ -37,7 +37,7 @@ def insert(q, values):
     c = mc.connect(user="root", password=password, host="localhost", database=database)
     cur = c.cursor(dictionary=True)
     cur.execute(q, values)
-    c.commit()
+    c.commit()  # Commit the changes using the database connection 'c'
     result = cur.lastrowid
     cur.close()
     c.close()

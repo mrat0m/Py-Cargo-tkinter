@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk  # Import ttk from tkinter
 import subprocess
 import sys
 import dbconnect  # Import your dbconnect.py module
@@ -29,48 +30,46 @@ def logout():
     view_packages_window.destroy()  # Close the packages window
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
 
+def add_package():
+    view_packages_window.destroy()  # Close the packages window
+    subprocess.run(["python", "packages.py", username])  # Open packages.py using subprocess
+
 # Function to add a View packages from the database
 def view_packages():
     q = "SELECT * FROM packages"
     res = dbconnect.select(q, ())  # Pass an empty tuple as values
+    
     if res:
-        package_frame = tk.Frame(view_packages_window)
-        package_frame.pack(pady=10)
-        print(res)  # Print the result to the console
-
+        # Create a Treeview widget
+        tree = tk.ttk.Treeview(view_packages_window)
+        tree.pack(pady=10)
+        
+        # Define columns and headings
+        tree["columns"] = ("packname", "maximum_weight", "maximum_height", "maximum_width", "minimum_price", "pstatus")
+        tree.heading("packname", text="Package Name")
+        tree.heading("maximum_weight", text="Maximum Weight")
+        tree.heading("maximum_height", text="Maximum Height")
+        tree.heading("maximum_width", text="Maximum Width")
+        tree.heading("minimum_price", text="Minimum Price")
+        tree.heading("pstatus", text="Status")
+        
+        # Add data to the Treeview
         for package_data in res:
-            # Extract package data and display using labels (as you have in your code)
             packname = package_data['packname']
             max_weight = package_data['maximum_weight']
             max_height = package_data['maximum_height']
             max_width = package_data['maximum_width']
             min_price = package_data['minimum_price']
             pstatus = package_data['pstatus']
-
-            packname_label = tk.Label(package_frame, text=f"Package Name: {packname}")
-            packname_label.pack()
-
-            max_weight_label = tk.Label(package_frame, text=f"Maximum Weight: {max_weight}")
-            max_weight_label.pack()
-
-            max_height_label = tk.Label(package_frame, text=f"Maximum Height: {max_height}")
-            max_height_label.pack()
-
-            max_width_label = tk.Label(package_frame, text=f"Maximum Width: {max_width}")
-            max_width_label.pack()
-
-            min_price_label = tk.Label(package_frame, text=f"Minimum Price: {min_price}")
-            min_price_label.pack()
-
-            pstatus_label = tk.Label(package_frame, text=f"Status: {pstatus}")
-            pstatus_label.pack()
+            
+            tree.insert("", "end", values=(packname, max_weight, max_height, max_width, min_price, pstatus))
 
 # Create the Packages GUI window
 view_packages_window = tk.Tk()
 view_packages_window.title("Quick Cargo | View Packages")
 
 # Set window size
-view_packages_window.geometry("500x400")  # Width x Height
+view_packages_window.geometry("1200x600")  # Width x Height
 
 # Add a stylish heading
 quick_cargo_label = tk.Label(view_packages_window, text="Quick Cargo",
@@ -107,6 +106,10 @@ manage_cargo_button.pack(side="left", padx=10)
 all_bookings_button = tk.Button(
     buttons_frame, text="All Bookings", command=all_bookings)
 all_bookings_button.pack(side="left", padx=10)
+
+add_package_button = tk.Button(
+    buttons_frame, text="Add Package", command=add_package)
+add_package_button.pack(side="left", padx=10)
 
 # Start the GUI event loop for the packages window
 view_packages_window.mainloop()
