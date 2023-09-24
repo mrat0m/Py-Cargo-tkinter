@@ -50,11 +50,34 @@ def go_to_customer_window(current_window):
 # Function to fetch and display package details
 def fetch_package_details():
     package_details_window = create_window("package_details_window", "Package Details", "400x400")
-    create_home_button(package_details_window)  # Add a "Home" button to this window
+
+    # Add a stylish heading
+    heading_label = tk.Label(package_details_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
+    heading_label.pack(pady=15)
+
+    # Create a frame for the top row (username, home button, and logout button)
+    top_frame = tk.Frame(package_details_window)
+    top_frame.pack(fill="x")
+
+    # Create a logout button on the top-right corner
+    logout_button = tk.Button(top_frame, text="Logout", command=logout)
+    logout_button.pack(side="right", padx=10, pady=5)
+
+    # Create a "Home" button on the top-right corner next to the logout button
+    home_button = tk.Button(top_frame, text="Home", command=lambda: go_to_customer_window(package_details_window))
+    home_button.pack(side="right", padx=10, pady=5)
+
+    # Display the username at the top-left corner
+    username_label = tk.Label(top_frame, text="Username: " + username, font=("Helvetica", 10))
+    username_label.pack(side="left", padx=10, pady=5)
+
+    # Add a title to the package details window in the middle
+    title_label = tk.Label(package_details_window, text="Package Details", font=("Helvetica", 16, "bold"))
+    title_label.pack(pady=10)
 
     # Create a canvas with a scrollbar
     canvas = tk.Canvas(package_details_window)
-    canvas.pack(side="left", fill="both", expand=True)
+    canvas.pack(side="left", fill="both", expand=True)  # Change 'side' to 'left'
 
     scrollbar = ttk.Scrollbar(package_details_window, orient="vertical", command=canvas.yview)
     scrollbar.pack(side="right", fill="y")
@@ -64,6 +87,7 @@ def fetch_package_details():
     # Create a frame inside the canvas to hold the package details
     package_frame = tk.Frame(canvas)
     canvas.create_window((0, 0), window=package_frame, anchor="nw")
+
 
     # Fetch package details from the database
     q = "SELECT pack_id, packname, maximum_weight, maximum_height, maximum_width, minimum_price, pstatus FROM packages"
