@@ -8,32 +8,47 @@ import dbconnect  # Import your dbconnect.py module
 username = sys.argv[1]
 
 # Function to open the Manage Cargo window
+
+
 def manage_cargo():
     messagebox.showinfo("Action Successful", "Redirecting to managecargo page")
     packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "managecargo.py", username])  # Run managecargo.py using subprocess
+    # Run managecargo.py using subprocess
+    subprocess.run(["python", "managecargo.py", username])
 
 # Function to open the all bookings window
+
+
 def all_bookings():
     messagebox.showinfo("Action Successful", "Redirecting to allbookings page")
     packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "allbookings.py", username])  # Run allbookings.py using subprocess
+    # Run allbookings.py using subprocess
+    subprocess.run(["python", "allbookings.py", username])
 
 # Function to go back to the admin window
+
+
 def back_to_admin():
     packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "admin.py", username])  # Return to admin.py using subprocess
+    # Return to admin.py using subprocess
+    subprocess.run(["python", "admin.py", username])
+
 
 def view_packages(username):
     packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "viewpackages.py", username])  # Run viewpackages.py using subprocess
+    # Run viewpackages.py using subprocess
+    subprocess.run(["python", "viewpackages.py", username])
 
 # Function to log out and return to the main window
+
+
 def logout():
     packages_window.destroy()  # Close the packages window
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
 
 # Function to add a new package to the database
+
+
 def add_package():
     packname = packname_entry.get()
     max_weight = max_weight_entry.get()
@@ -48,7 +63,8 @@ def add_package():
 
     # Insert package data into the 'packages' table using dbconnect.insert
     insert_query = "INSERT INTO packages (packname, maximum_weight, maximum_height, maximum_width, minimum_price, pstatus) VALUES (%s, %s, %s, %s, %s, %s)"
-    insert_values = (packname, max_weight, max_height, max_width, min_price, pstatus)
+    insert_values = (packname, max_weight, max_height,
+                     max_width, min_price, pstatus)
     new_package_id = dbconnect.insert(insert_query, insert_values)
 
     if new_package_id:
@@ -59,7 +75,8 @@ def add_package():
         max_weight_entry.delete(0, tk.END)
         max_height_entry.delete(0, tk.END)
         max_width_entry.delete(0, tk.END)
-       
+
+
 # Create the Packages GUI window
 packages_window = tk.Tk()
 packages_window.title("Quick Cargo | Add Packages")
@@ -69,7 +86,7 @@ packages_window.geometry("500x400")  # Width x Height
 
 # Add a stylish heading
 quick_cargo_label = tk.Label(packages_window, text="Quick Cargo",
-                            font=("Helvetica", 20, "bold"))
+                             font=("Helvetica", 20, "bold"))
 quick_cargo_label.pack(pady=10)
 
 # Create a frame for the header (top row)
@@ -120,7 +137,8 @@ min_price_entry = tk.Entry(packages_window, width=30)
 min_price_entry.pack()
 
 # Create a button to add the package to the database
-add_button = tk.Button(packages_window, text="Add Package", command=add_package)
+add_button = tk.Button(
+    packages_window, text="Add Package", command=add_package)
 add_button.pack(pady=10)
 
 # Create a frame for the buttons (bottom row)
@@ -128,7 +146,8 @@ buttons_frame = tk.Frame(packages_window)
 buttons_frame.pack(side="bottom", fill="x", pady=10)
 
 # Create buttons for different options in the buttons frame
-back_button = tk.Button(buttons_frame, text="Back to Admin", command=back_to_admin)
+back_button = tk.Button(
+    buttons_frame, text="Back to Admin", command=back_to_admin)
 back_button.pack(side="left", padx=10)
 
 manage_cargo_button = tk.Button(
