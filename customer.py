@@ -12,6 +12,9 @@ username = sys.argv[1]
 # Create a dictionary to store references to all windows
 windows = {}
 
+# Initialize customer_window as None
+customer_window = None
+
 # Create the main customer window
 customer_window = tk.Tk()
 customer_window.title("Quick Cargo | Customer Panel")
@@ -20,8 +23,9 @@ windows["customer_window"] = customer_window  # Store a reference to the custome
 
 # Function to go back to the main login window (main.py)
 def logout():
-    for window in windows.values():
-        window.destroy()  # Close all windows
+    global customer_window  # Declare customer_window as global
+    if customer_window:
+        customer_window.destroy()  # Close the customer window if it exists
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
 
 # Function to create a new window, add it to the dictionary, and set its size
@@ -45,8 +49,21 @@ def go_to_customer_window(current_window):
 
 # Function to fetch and display package details
 def fetch_package_details():
-    package_details_window = create_window("package_details_window", "Package Details", "600x400")
+    package_details_window = create_window("package_details_window", "Package Details", "400x400")
     create_home_button(package_details_window)  # Add a "Home" button to this window
+
+    # Create a canvas with a scrollbar
+    canvas = tk.Canvas(package_details_window)
+    canvas.pack(side="left", fill="both", expand=True)
+
+    scrollbar = ttk.Scrollbar(package_details_window, orient="vertical", command=canvas.yview)
+    scrollbar.pack(side="right", fill="y")
+
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Create a frame inside the canvas to hold the package details
+    package_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=package_frame, anchor="nw")
 
     # Fetch package details from the database
     q = "SELECT pack_id, packname, maximum_weight, maximum_height, maximum_width, minimum_price, pstatus FROM packages"
@@ -61,21 +78,22 @@ def fetch_package_details():
         minimum_price = package["minimum_price"]
         pstatus = package["pstatus"]
 
-        # Create a frame for each package with its details and a book button
-        package_frame = tk.Frame(package_details_window, padx=10, pady=10)
-        package_frame.pack(fill=tk.BOTH)
-
         # Add package details to the frame
         tk.Label(package_frame, text="Package Name: " + packname).pack(anchor=tk.W)
         tk.Label(package_frame, text="Maximum Weight: " + maximum_weight).pack(anchor=tk.W)
         tk.Label(package_frame, text="Maximum Height: " + maximum_height).pack(anchor=tk.W)
         tk.Label(package_frame, text="Maximum Width: " + maximum_width).pack(anchor=tk.W)
         tk.Label(package_frame, text="Minimum Price: " + minimum_price).pack(anchor=tk.W)
-        tk.Label(package_frame, text="Status: " + pstatus).pack(anchor=tk.W)
+        # tk.Label(package_frame, text="Status: " + pstatus).pack(anchor=tk.W)
 
         # Create a button to book the selected package
         book_button = tk.Button(package_frame, text="Book", command=lambda p=pack_id, name=packname: book_package(p, name, package_details_window))
         book_button.pack(anchor=tk.W)
+
+    package_frame.update_idletasks()  # Update the canvas
+
+    # Configure the canvas scroll region
+    canvas.config(scrollregion=canvas.bbox("all"))
 
 # Function to book a package
 def book_package(pack_id, packname, parent_window):
@@ -125,18 +143,17 @@ def book_package(pack_id, packname, parent_window):
 
 # Function to view bookings
 def view_bookings():
-    bookings_window = create_window("bookings_window", "My Bookings", "800x600")
+    bookings_window = create_window("bookings_window", "My Bookings", "1000x500")
     create_home_button(bookings_window)  # Add a "Home" button to this window
 
     q = "SELECT * FROM bookings WHERE customer_id = %s"
     customer_id = dbconnect.get_customer_id(username)
     bookings = dbconnect.select(q, (customer_id,))
 
-    tree = ttk.Treeview(bookings_window)
-    tree.pack(padx=10, pady=10)
+    frame = tk.Frame(bookings_window)
+    frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-    tree["columns"] = ("booking_id", "booking_date", "from_loc", "toloc", "weight", "amount", "booking_status")
-
+    tree = ttk.Treeview(frame, columns=("booking_id", "booking_date", "from_loc", "toloc", "weight", "amount", "booking_status"))
     tree.heading("booking_id", text="Booking ID")
     tree.heading("booking_date", text="Booking Date")
     tree.heading("from_loc", text="From Location")
@@ -145,6 +162,12 @@ def view_bookings():
     tree.heading("amount", text="Amount")
     tree.heading("booking_status", text="Status")
 
+    tree.column("#0", width=0, stretch=tk.NO)  # Hide the first column
+
+    vsb = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+
+    # Add data to the Treeview
     for booking in bookings:
         booking_id = booking["booking_id"]
         booking_date = booking["booking_date"]
@@ -155,6 +178,10 @@ def view_bookings():
         booking_status = booking["booking_status"]
 
         tree.insert("", "end", values=(booking_id, booking_date, from_loc, toloc, weight, amount, booking_status))
+
+    # Pack the Treeview and scrollbar
+    tree.pack(side="left", fill="both", expand=True)
+    vsb.pack(side="right", fill="y")
 
 # Add a stylish heading
 heading_label = tk.Label(customer_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
