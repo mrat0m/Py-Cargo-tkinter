@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 import subprocess
 import dbconnect  # Importing the dbconnect module
+from PIL import Image, ImageTk  # Import PIL for image handling
+import ctypes
 
 # Function to perform database login
 def dblogin():
@@ -33,42 +35,70 @@ def register_customer():
     window.destroy()  # Close the main login window
     subprocess.run(["python", "registercustomer.py"])  # Run register.py using subprocess
 
+# Get the screen width and height
+user32 = ctypes.windll.user32
+screen_width = user32.GetSystemMetrics(0)
+screen_height = user32.GetSystemMetrics(1)
+
+# Calculate window width and height
+window_width = int(screen_width * 0.8)
+window_height = int(screen_height * 0.8)
+
 # Create the GUI window
 window = tk.Tk()
 window.title("Quick Cargo | Login")
 
-# Set window size
-window.geometry("400x300")  # Width x Height
+# Set window size to fit the screen
+window.geometry(f"{window_width}x{window_height}")
 
-# Add a stylish heading
-heading_label = tk.Label(window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
+# Load and display the background image
+bg_image = Image.open("img1.jpeg")  # Replace "img1.jpeg" with the actual filename
+bg_image = ImageTk.PhotoImage(bg_image)
+bg_label = tk.Label(window, image=bg_image)
+bg_label.place(relwidth=1, relheight=1)
+
+# Add a stylish heading with a logo
+heading_frame = tk.Frame(window, bg="white")  # Background color for heading frame
+heading_frame.pack(fill="both", pady=20)  # Increase top padding
+
+# Load and display the logo
+logo_image = Image.open("logo.png")  # Replace "logo.png" with the actual filename
+logo_image = ImageTk.PhotoImage(logo_image)
+logo_label = tk.Label(heading_frame, image=logo_image)
+logo_label.pack(side="left", padx=10)
+
+# Create the heading label
+heading_label = tk.Label(heading_frame, text="Quick Cargo", font=("Helvetica", 30, "bold"), bg="white")
 heading_label.pack(pady=15)
 
+# Create a frame to center the login form
+login_frame = tk.Frame(window, bg="white")
+login_frame.pack(pady=20)
+
 # Create labels, entry fields, and login button
-username_label = tk.Label(window, text="Username:")
+username_label = tk.Label(login_frame, text="Username:", font=("Helvetica", 14))
 username_label.pack()
 
-username_entry = tk.Entry(window, width=30)
+username_entry = tk.Entry(login_frame, font=("Helvetica", 14), width=30)
 username_entry.pack()
 
-password_label = tk.Label(window, text="Password:")
+password_label = tk.Label(login_frame, text="Password:", font=("Helvetica", 14))
 password_label.pack()
 
-password_entry = tk.Entry(window, show="*", width=30)
+password_entry = tk.Entry(login_frame, show="*", font=("Helvetica", 14), width=30)
 password_entry.pack()
 
-login_button = tk.Button(window, text="Login", command=dblogin, width=10)
+login_button = tk.Button(login_frame, text="Login", command=dblogin, width=20, font=("Helvetica", 14))
 login_button.pack()
 
-
 # Create a frame for the "New Customer? Register" text and the link
-new_customer_frame = tk.Frame(window)
+new_customer_frame = tk.Frame(window, bg="white")
 new_customer_frame.pack()
 
-new_customer_label = tk.Label(new_customer_frame, text="New Customer?")
+new_customer_label = tk.Label(new_customer_frame, text="New Customer?", font=("Helvetica", 14))
 new_customer_label.pack(side="left")
 
-register_link = tk.Label(new_customer_frame, text="Register", fg="blue", cursor="hand2")
+register_link = tk.Label(new_customer_frame, text="Register", fg="blue", cursor="hand2", font=("Helvetica", 14))
 register_link.pack(side="left")
 register_link.bind("<Button-1>", lambda e: register_customer())  # Bind the click event to open_registration()
 
