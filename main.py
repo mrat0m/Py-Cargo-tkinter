@@ -1,6 +1,9 @@
+import subprocess
+# Run the database creation script first
+subprocess.run(["python", "check_and_create_database.py"])
+
 import tkinter as tk
 from tkinter import messagebox
-import subprocess
 import dbconnect  # Importing the dbconnect module
 from PIL import Image, ImageTk  # Import PIL for image handling
 # import ctypes
