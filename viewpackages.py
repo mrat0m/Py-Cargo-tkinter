@@ -4,85 +4,133 @@ import subprocess
 import sys
 import dbconnect  # Import your dbconnect.py module
 
-# Define tree at the global scope
-tree = None
+# Create a dictionary to store references to all windows
+windows = {}
 
 # Get the username from the command line arguments
 username = sys.argv[1]
 
-# Function to open the Manage Packages window
-def manage_packages():
-    messagebox.showinfo("Action Successful", "Redirecting to packages page")
-    packages_window.destroy()  # Close the admin window
-    subprocess.run(["python", "packages.py", username])  # Run packages.py using subprocess
-    
 # Function to open the Manage Cargo window
 def manage_cargo():
-    messagebox.showinfo("Action Successful", "Redirecting to managecargo page")
-    packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "managecargo.py", username])  # Run managecargo.py using subprocess
+    subprocess.run(["python", "managecargo.py", username])
 
-# Function to open the all bookings window
+# Function to open the All Bookings window
 def all_bookings():
-    messagebox.showinfo("Action Successful", "Redirecting to allbookings page")
-    packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "allbookings.py", username])  # Run allbookings.py using subprocess
+    subprocess.run(["python", "allbookings.py", username])
 
-# Function to go back to the admin window
+# Function to log out and return to the main window
+def logout():
+    subprocess.run(["python", "main.py"])
+
 def back_to_admin():
-    packages_window.destroy()  # Close the packages window
-    subprocess.run(["python", "admin.py", username])  # Return to admin.py using subprocess
+    windows["view_package_window"].destroy()
+    # Return to admin.py using subprocess
+    subprocess.run(["python", "admin.py", username])
 
-def view_packages(username, tree):
-    # Remove the global declaration for tree
+def create_window(window_name, title, size):
+    if window_name in windows:
+        return windows[window_name]
+
+    new_window = tk.Toplevel()
+    new_window.title(title)
+    new_window.geometry(size)
+    windows[window_name] = new_window  # Store a reference to the new window
+    return new_window
+
+# Function to view packages
+def view_packages(username):
     q = "SELECT * FROM packages"
-    res = dbconnect.select(q, ())  # Pass an empty tuple as values
+    res = dbconnect.select(q, ())  # Assuming this function fetches data from the database
+
+    if "packages_window" in windows:
+        # Destroy the packages_window if it exists
+        windows["packages_window"].destroy()
     
-    if res:
-        # Create a new window for displaying packages
-        packages_window = tk.Toplevel()
-        packages_window.title("View Packages")
+    if "view_package_window" not in windows:
+        # Create the view packages window if it doesn't exist
+        create_window("view_package_window", "Package Details", "800x800")
+    
+    view_package_window = windows["view_package_window"]
+    view_package_window.deiconify()  # Show the window if it's hidden
 
-        # Create a Treeview widget
-        tree = ttk.Treeview(packages_window)
-        tree.pack(pady=10)
+    # Clear the previous content in the window (if any)
+    for widget in view_package_window.winfo_children():
+        widget.destroy()
 
-        # Define columns and headings
-        tree["columns"] = ("pack_id", "packname", "max_weight", "max_height", "max_width", "min_price", "pstatus", "actions")
-        tree.heading("pack_id", text="Package ID")
-        tree.heading("packname", text="Package Name")
-        tree.heading("max_weight", text="Maximum Weight")
-        tree.heading("max_height", text="Maximum Height")
-        tree.heading("max_width", text="Maximum Width")
-        tree.heading("min_price", text="Minimum Price")
-        tree.heading("pstatus", text="Status")
-        tree.heading("actions", text="Actions")
+    # Add a stylish heading
+    heading_label = tk.Label(
+        view_package_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
+    heading_label.pack(pady=15)
 
-        # Add data to the Treeview
-        for package_data in res:
-            pack_id = package_data['pack_id']
-            packname = package_data['packname']
-            max_weight = package_data['maximum_weight']
-            max_height = package_data['maximum_height']
-            max_width = package_data['maximum_width']
-            min_price = package_data['minimum_price']
-            pstatus = package_data['pstatus']
+    # Create a frame for the top row (username, home button, and logout button)
+    top_frame = tk.Frame(view_package_window)
+    top_frame.pack(fill="x")
 
-            # Insert data into the Treeview
-            item_id = tree.insert("", "end", values=(pack_id, packname, max_weight, max_height, max_width, min_price, pstatus, ""))
-            edit_button = tk.Button(packages_window, text="Edit", command=lambda pack_id=pack_id: edit_package(pack_id))
-            delete_button = tk.Button(packages_window, text="Delete", command=lambda pack_id=pack_id: delete_package(pack_id))
-            tree.set(item_id, "actions", edit_button)
+    # Create a logout button on the top-right corner
+    logout_button = tk.Button(top_frame, text="Logout", command=logout)
+    logout_button.pack(side="right", padx=10, pady=5)
 
-            # Create an additional column for the Delete button
-            tree.insert(item_id, "end", values=("", ""), tags=("actions",))
-            tree.set(item_id, "actions", delete_button)
+    # Create a "Home" button on the top-right corner next to the logout button
+    home_button = tk.Button(top_frame, text="Back to admin", command=back_to_admin)
+    home_button.pack(side="right", padx=10, pady=5)
+
+    # Display the username at the top-left corner
+    username_label = tk.Label(
+        top_frame, text="Username: " + username, font=("Helvetica", 10))
+    username_label.pack(side="left", padx=10, pady=5)
+
+    # Add a title to the package details window in the middle
+    title_label = tk.Label(
+        view_package_window, text="Package Details", font=("Helvetica", 16, "bold"))
+    title_label.pack(pady=10)
+
+    # Create a canvas with a scrollbar
+    canvas = tk.Canvas(view_package_window)
+    canvas.pack(side="left", fill="both", expand=True)
+
+    scrollbar = ttk.Scrollbar(view_package_window, orient="vertical", command=canvas.yview)
+    scrollbar.pack(side="right", fill="y")
+
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    # Create a frame inside the canvas to hold the package details
+    package_frame = tk.Frame(canvas)
+    canvas.create_window((0, 0), window=package_frame, anchor="nw")
+
+    for packages in res:
+        pack_id = packages["pack_id"]
+        packname = packages["packname"]
+        maximum_weight = packages["maximum_weight"]
+        maximum_height = packages["maximum_height"]
+        maximum_width = packages["maximum_width"]
+        minimum_price = packages["minimum_price"]
+        pstatus = packages["pstatus"]
+
+        # Add package details to the frame
+        tk.Label(package_frame, text="Package ID: " + str(pack_id)).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Package Name: " + packname).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Maximum Weight: " + maximum_weight).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Maximum Height: " + maximum_height).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Maximum Width: " + maximum_width).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Minimum Price: " + minimum_price).pack(anchor=tk.W)
+        tk.Label(package_frame, text="Status: " + pstatus).pack(anchor=tk.W)
+
+        # Create a button to edit the selected package
+        book_button = tk.Button(package_frame, text="Edit", command=lambda p=pack_id: edit_package(p))
+        book_button.pack(anchor=tk.W)
+        # Create a button to delete the selected package
+        book_button = tk.Button(package_frame, text="Delete", command=lambda p=pack_id: delete_package(p))
+        book_button.pack(anchor=tk.W)
+
+        package_frame.update_idletasks()  # Update the canvas
+
+        # Configure the canvas scroll region
+        canvas.config(scrollregion=canvas.bbox("all"))
 
 # Function to edit a package
 def edit_package(pack_id):
     # Create a new window for editing
-    edit_window = tk.Toplevel()
-    edit_window.title("Edit Package")
+    edit_window = create_window("view_package_window", "Package Details", "800x800")
 
     # Create labels and entry fields for editing package information
     label_packname = tk.Label(edit_window, text="Package Name:")
@@ -141,9 +189,6 @@ def delete_package(pack_id):
             delete_values = (pack_id,)
             dbconnect.execute(delete_query, delete_values)  # Assuming dbconnect.execute executes the SQL query
 
-            # Refresh the view after deletion
-            view_packages(username, tree)
-
             messagebox.showinfo("Success", "Package deleted successfully!")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while deleting the package: {str(e)}")
@@ -152,49 +197,10 @@ def delete_package(pack_id):
 def save_package_changes(pack_id, packname, max_weight, max_height, max_width, min_price):
     try:
         # Update the package information in the database
-        update_query = "UPDATE packages SET packname = %s, maximum_weight = %s, maximum_height = %s, maximum_width = %s, minimum_price = %s WHERE pack_id = %s"
-        update_values = (packname, max_weight, max_height, max_width, min_price, pack_id)
-        dbconnect.execute(update_query, update_values)  # Assuming dbconnect.execute executes the SQL query
+        q = "UPDATE packages SET packname = %s, maximum_weight = %s, maximum_height = %s, maximum_width = %s, minimum_price = %s WHERE pack_id = %s"
+        values = (packname, max_weight, max_height, max_width, min_price, pack_id)
+        dbconnect.execute(q, values)  # Assuming dbconnect.execute executes the SQL query
         messagebox.showinfo("Success", "Package information updated successfully!")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while updating package information: {str(e)}")
 
-# Create the Packages GUI window
-packages_window = tk.Tk()
-packages_window.title("Quick Cargo | View Packages")
-
-# Set window size
-packages_window.geometry("800x600")  # Width x Height
-
-# Add a stylish heading
-quick_cargo_label = tk.Label(packages_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
-quick_cargo_label.pack(pady=10)
-
-# Create a frame for the header (top row)
-header_frame = tk.Frame(packages_window)
-header_frame.pack(side="top", fill="x")
-
-# Display the username in the header frame (top left corner)
-username_label = tk.Label(header_frame, text=f"Username: {username}")
-username_label.pack(side="left", padx=10)
-
-# Add a logout button to the header frame (top right corner)
-logout_button = tk.Button(header_frame, text="Logout", command=back_to_admin)
-logout_button.pack(side="right", padx=10)
-
-heading_label = tk.Label(packages_window, text="View Packages", font=("Helvetica", 16, "bold"))
-heading_label.pack()
-
-# Create a button to go back to the admin window
-back_button = tk.Button(packages_window, text="Back to Admin", command=back_to_admin)
-back_button.pack(pady=10)
-
-# Create a button to add a new package
-add_package_button = tk.Button(packages_window, text="Add New Package", command=manage_packages)
-add_package_button.pack(pady=10)
-
-# Call the view_packages function to populate the Treeview
-view_packages(username, tree)
-
-# Start the GUI event loop for the packages window
-packages_window.mainloop()

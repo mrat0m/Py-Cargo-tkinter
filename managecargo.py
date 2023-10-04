@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import subprocess
 import sys
-import dbconnect  # Import your dbconnect.py module
+import dbconnect  # dbconnect.py
 
 # Function to go back to the admin window
 def back_to_admin():

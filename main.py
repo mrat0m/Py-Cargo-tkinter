@@ -1,16 +1,13 @@
 import subprocess
-# Run the database creation script first
 subprocess.run(["python", "check_and_create_database.py"])
 
 import tkinter as tk
 from tkinter import messagebox
-import dbconnect  # Importing the dbconnect module
-from PIL import Image, ImageTk  # Import PIL for image handling
+import dbconnect  #  dbconnect.py
+from PIL import Image, ImageTk 
 # import ctypes
 
-# Function to perform database login
-
-
+# Function to perform login
 def dblogin():
     user = username_entry.get()
     passw = password_entry.get()
@@ -18,7 +15,7 @@ def dblogin():
     data = {}
     q = "SELECT * FROM login WHERE username=%s AND password=%s"
     values = (user, passw)
-    res = dbconnect.select(q, values)  # Pass values to the select function
+    res = dbconnect.select(q, values) 
 
     if res:
         username = res[0]['username']
@@ -42,8 +39,6 @@ def dblogin():
             "Quick Cargo", "Invalid Login Details!! Please try again")
 
 # Function to open the registration window
-
-
 def register_customer():
     window.destroy()  # Close the main login window
     # Run register.py using subprocess
@@ -70,20 +65,17 @@ window.title("Quick Cargo | Login")
 # Set window size to fit the screen
 window.geometry(f"{window_width}x{window_height}")
 
-# Load and display the background image
-# Replace "img1.jpeg" with the actual filename
+# Background image
 bg_image = Image.open("img1.jpeg")
 bg_image = ImageTk.PhotoImage(bg_image)
 bg_label = tk.Label(window, image=bg_image)
 bg_label.place(relwidth=1, relheight=1)
 
-# Add a stylish heading with a logo
 # Background color for heading frame
 heading_frame = tk.Frame(window, bg="white")
-heading_frame.pack(fill="both", pady=20)  # Increase top padding
+heading_frame.pack(fill="both", pady=20)
 
-# Load and display the logo
-# Replace "logo.png" with the actual filename
+# Logo
 logo_image = Image.open("logo.png")
 logo_image = ImageTk.PhotoImage(logo_image)
 logo_label = tk.Label(heading_frame, image=logo_image)

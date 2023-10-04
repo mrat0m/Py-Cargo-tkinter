@@ -3,13 +3,12 @@ from tkinter import messagebox
 import subprocess
 import sys
 import dbconnect  # Import your dbconnect.py module
+import viewpackages
 
 # Get the username from the command line arguments
 username = sys.argv[1]
 
 # Function to open the Manage Cargo window
-
-
 def manage_cargo():
     messagebox.showinfo("Action Successful", "Redirecting to managecargo page")
     packages_window.destroy()  # Close the packages window
@@ -17,8 +16,6 @@ def manage_cargo():
     subprocess.run(["python", "managecargo.py", username])
 
 # Function to open the all bookings window
-
-
 def all_bookings():
     messagebox.showinfo("Action Successful", "Redirecting to allbookings page")
     packages_window.destroy()  # Close the packages window
@@ -26,29 +23,17 @@ def all_bookings():
     subprocess.run(["python", "allbookings.py", username])
 
 # Function to go back to the admin window
-
-
 def back_to_admin():
     packages_window.destroy()  # Close the packages window
     # Return to admin.py using subprocess
     subprocess.run(["python", "admin.py", username])
 
-
-def view_packages(username):
-    packages_window.destroy()  # Close the packages window
-    # Run viewpackages.py using subprocess
-    subprocess.run(["python", "viewpackages.py", username])
-
 # Function to log out and return to the main window
-
-
 def logout():
     packages_window.destroy()  # Close the packages window
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
 
 # Function to add a new package to the database
-
-
 def add_package():
     packname = packname_entry.get()
     max_weight = max_weight_entry.get()
@@ -75,7 +60,6 @@ def add_package():
         max_weight_entry.delete(0, tk.END)
         max_height_entry.delete(0, tk.END)
         max_width_entry.delete(0, tk.END)
-
 
 # Create the Packages GUI window
 packages_window = tk.Tk()
@@ -160,7 +144,7 @@ all_bookings_button.pack(side="left", padx=10)
 
 # Create a button to go to the View Packages window
 view_packages_button = tk.Button(
-    buttons_frame, text="View Packages", command=lambda: view_packages(username))
+    buttons_frame, text="View Packages", command=lambda: viewpackages.view_packages(username))
 view_packages_button.pack(side="right", padx=10)
 
 # Start the GUI event loop for the packages window
