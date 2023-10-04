@@ -41,11 +41,17 @@ def create_home_button(window):
     home_button = tk.Button(window, text="Home", command=lambda w=window: go_to_customer_window(w))
     home_button.pack(side="bottom", pady=10)
 
-# Function to destroy the current window and go back to the customer window
-def go_to_customer_window(current_window):
+# Modify the go_to_customer_window function to accept two arguments
+def go_to_customer_window(current_window, parent_window):
     current_window.destroy()  # Destroy the current window
-    customer_window.deiconify()  # Show the customer window
-    windows["current_window"] = customer_window  # Set the current window as the customer window
+    parent_window.deiconify()  # Show the parent window
+    windows["current_window"] = parent_window  # Set the current window as the parent window
+
+def update_booking_status(booking_id, new_status):
+    # Update the booking status in the database for the given booking_id
+    q = "UPDATE bookings SET booking_status = %s WHERE booking_id = %s"
+    values = (new_status, booking_id)
+    dbconnect.update(q, values)
 
 # Function to fetch and display package details
 def fetch_package_details():
@@ -155,15 +161,71 @@ def book_package(pack_id, packname, parent_window):
         amount = minimum_price
 
         q = "INSERT INTO bookings (customer_id, from_loc, toloc, weight, length, width, amount, booking_status, pack_id, booking_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (customer_id, from_loc, to_loc, maximum_weight, maximum_height, maximum_width, amount, "Booked", pack_id , current_datetime)
-        dbconnect.insert(q, values)
+        values = (customer_id, from_loc, to_loc, maximum_weight, maximum_height, maximum_width, amount, "Processing", pack_id , current_datetime)
+        booking_id = dbconnect.insert(q, values)
 
-        messagebox.showinfo("Booking Confirmation", "Booking successful!")
+        # Update the booking status to "Processing"
+        update_booking_status(booking_id, "Processing")
+
+        messagebox.showinfo("Booking Confirmation", "Redirecting to payment portal!! WARNING: this is development phone never share orginal card details!")
+        
+         # Destroy the "Book Package" window
         book_package_window.destroy()
-        go_to_customer_window(book_package_window)  # Go back to the customer window
+        
+        # Redirect to the payment page
+        create_payment_window(amount, booking_id, book_package_window)
 
     confirm_button = tk.Button(book_package_window, text="Confirm Booking", command=confirm_booking)
     confirm_button.pack(pady=10)
+
+    def create_payment_window(amount, booking_id, parent_window):
+        payment_window = create_window("payment_window", "Card Payment", "500x400")
+        create_home_button(payment_window)  # Add a "Home" button to this window
+
+        tk.Label(payment_window, text=f"Amount to Pay: ₹{amount}/-").pack(pady=5)
+
+        tk.Label(payment_window, text="Card Number:").pack(pady=5)
+        card_number_entry = tk.Entry(payment_window)
+        card_number_entry.pack()
+
+        tk.Label(payment_window, text="Name on Card:").pack(pady=5)
+        name_on_card_entry = tk.Entry(payment_window)
+        name_on_card_entry.pack()
+
+        tk.Label(payment_window, text="Expiry Date:").pack(pady=5)
+        exp_date_entry = tk.Entry(payment_window)
+        exp_date_entry.pack()
+
+        tk.Label(payment_window, text="CVV:").pack(pady=5)
+        cvv_entry = tk.Entry(payment_window)
+        cvv_entry.pack()
+
+        def process_payment():
+            card_number = card_number_entry.get()
+            name_on_card = name_on_card_entry.get()
+            exp_date = exp_date_entry.get()
+            cvv = cvv_entry.get()
+
+            # Here, you can implement the actual payment processing logic
+            # (e.g., connecting to a payment gateway).
+
+            # For demonstration purposes, simply close the payment window and show a confirmation message.
+            payment_window.destroy()
+            messagebox.showinfo("Payment Confirmation", f"Payment of ₹{amount}/- for Booking ID {booking_id} is confirmed!")
+
+            # Insert payment record into the database
+            q = "INSERT INTO payment (booking_id, amount_paid, payment_date) VALUES (%s, %s, %s)"
+            current_datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            dbconnect.insert(q, (booking_id, amount, current_datetime))
+
+            # Update the booking status to "Paid"
+            update_booking_status(booking_id, "Paid")
+
+            # Redirect back to the customer window
+            go_to_customer_window(payment_window, parent_window)
+
+        pay_button = tk.Button(payment_window, text="Pay", command=process_payment)
+        pay_button.pack(pady=10)
 
 # Function to view bookings
 def view_bookings():
