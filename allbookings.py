@@ -28,7 +28,7 @@ def view_all_bookings():
         bookings_window.title("All Bookings")
 
         # Create a Treeview widget
-        tree = tk.ttk.Treeview(bookings_window)
+        tree = ttk.Treeview(bookings_window)
         tree.pack(pady=10)
 
         # Define columns and headings
@@ -45,6 +45,13 @@ def view_all_bookings():
         tree.heading("booking_status", text="Booking Status")
         tree.heading("pack_id", text="Package ID")
 
+        # Create horizontal scrollbar
+        hsb = ttk.Scrollbar(bookings_window, orient="horizontal", command=tree.xview)
+        hsb.pack(side="bottom", fill="x")
+
+        # Configure the treeview to use the horizontal scrollbar
+        tree.configure(xscrollcommand=hsb.set)
+        
         # Add data to the Treeview
         for booking_data in res:
             booking_id = booking_data['booking_id']
