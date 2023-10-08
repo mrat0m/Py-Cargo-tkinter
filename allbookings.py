@@ -21,7 +21,8 @@ def logout():
 def view_all_bookings():
     q = "SELECT * FROM bookings"
     res = dbconnect.select(q, ())  # Pass an empty tuple as values
-    
+    total = 0
+
     if res:
         # Create a new window for displaying bookings
         bookings_window = tk.Toplevel(all_bookings_window)
@@ -62,11 +63,16 @@ def view_all_bookings():
             weight = booking_data['weight']
             length = booking_data['length']
             width = booking_data['width']
-            amount = booking_data['amount']
+            amount = int(booking_data['amount'])
             booking_status = booking_data['booking_status']
             pack_id = booking_data['pack_id']
+            if booking_data['booking_status'] == "Paid" or booking_data['booking_status'] =="Booked":
+                total = total + amount
 
             tree.insert("", "end", values=(booking_id, customer_id, booking_date, from_loc, toloc, weight, length, width, amount, booking_status, pack_id))
+
+        total_label = tk.Label(header_frame, font=("Helvetica", 20, "bold"), text=f"Total= ₹{total}/-")
+        total_label.pack(side="right", padx=10)
 
 # Create the All Bookings GUI window
 all_bookings_window = tk.Tk()
