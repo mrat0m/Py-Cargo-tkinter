@@ -12,18 +12,25 @@ username = sys.argv[1]
 
 # Function to open the Manage Cargo window
 def manage_cargo():
+    windows["view_package_window"].destroy()
     subprocess.run(["python", "managecargo.py", username])
 
 # Function to open the All Bookings window
 def all_bookings():
+    windows["view_package_window"].destroy()
     subprocess.run(["python", "allbookings.py", username])
 
 # Function to log out and return to the main window
 def logout():
+    windows["view_package_window"].destroy()
     subprocess.run(["python", "main.py"])
 
 def back_to_admin():
-    windows["view_package_window"].destroy()
+    if "view_package_window" in windows:
+        print("Destroying view_package_window")
+        windows["view_package_window"].destroy()
+    else:
+        print("view_package_window not found in windows dictionary")
     # Return to admin.py using subprocess
     subprocess.run(["python", "admin.py", username])
 
@@ -42,16 +49,10 @@ def view_packages(username):
     q = "SELECT * FROM packages"
     res = dbconnect.select(q, ())  # Assuming this function fetches data from the database
 
-    if "packages_window" in windows:
-        # Destroy the packages_window if it exists
-        windows["packages_window"].destroy()
-    
-    if "view_package_window" not in windows:
-        # Create the view packages window if it doesn't exist
-        create_window("view_package_window", "Package Details", "800x800")
-    
+    # Create a new view_package_window each time
+    create_window("view_package_window", "Package Details", "800x800")
+        
     view_package_window = windows["view_package_window"]
-    view_package_window.deiconify()  # Show the window if it's hidden
 
     # Clear the previous content in the window (if any)
     for widget in view_package_window.winfo_children():
@@ -116,11 +117,12 @@ def view_packages(username):
         tk.Label(package_frame, text="Status: " + pstatus).pack(anchor=tk.W)
 
         # Create a button to edit the selected package
-        book_button = tk.Button(package_frame, text="Edit", command=lambda p=pack_id: edit_package(p))
-        book_button.pack(anchor=tk.W)
+        edit_button = tk.Button(package_frame, text="Edit", command=lambda p=pack_id: edit_package(p))
+        edit_button.pack(anchor=tk.W)
         # Create a button to delete the selected package
-        book_button = tk.Button(package_frame, text="Delete", command=lambda p=pack_id: delete_package(p))
-        book_button.pack(anchor=tk.W)
+        delete_button = tk.Button(package_frame, text="Delete", command=lambda p=pack_id: delete_package(p))
+        delete_button.pack(anchor=tk.W)
+
 
         package_frame.update_idletasks()  # Update the canvas
 
@@ -162,15 +164,15 @@ def edit_package(pack_id):
         # Fetch the current package details from the database
         select_query = "SELECT * FROM packages WHERE pack_id = %s"
         select_values = (pack_id,)
-        package_data = dbconnect.select_one(select_query, select_values)
+        package_data = dbconnect.select(select_query, select_values)
 
         if package_data:
             # Populate the entry fields with the current package data
-            entry_packname.insert(0, package_data['packname'])
-            entry_max_weight.insert(0, package_data['maximum_weight'])
-            entry_max_height.insert(0, package_data['maximum_height'])
-            entry_max_width.insert(0, package_data['maximum_width'])
-            entry_min_price.insert(0, package_data['minimum_price'])
+            entry_packname.insert(0, package_data[0]['packname'])
+            entry_max_weight.insert(0, package_data[0]['maximum_weight'])
+            entry_max_height.insert(0, package_data[0]['maximum_height'])
+            entry_max_width.insert(0, package_data[0]['maximum_width'])
+            entry_min_price.insert(0, package_data[0]['minimum_price'])
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while fetching package details: {str(e)}")
 
@@ -184,10 +186,10 @@ def delete_package(pack_id):
         # Confirm the deletion with a message box
         confirmation = messagebox.askyesno("Delete Package", "Are you sure you want to delete this package?")
         if confirmation:
-            # Delete the package from the database
+            # Delete the package from the database based on the pack_id
             delete_query = "DELETE FROM packages WHERE pack_id = %s"
             delete_values = (pack_id,)
-            dbconnect.execute(delete_query, delete_values)  # Assuming dbconnect.execute executes the SQL query
+            dbconnect.delete(delete_query, delete_values)  
 
             messagebox.showinfo("Success", "Package deleted successfully!")
     except Exception as e:
@@ -199,8 +201,9 @@ def save_package_changes(pack_id, packname, max_weight, max_height, max_width, m
         # Update the package information in the database
         q = "UPDATE packages SET packname = %s, maximum_weight = %s, maximum_height = %s, maximum_width = %s, minimum_price = %s WHERE pack_id = %s"
         values = (packname, max_weight, max_height, max_width, min_price, pack_id)
-        dbconnect.execute(q, values)  # Assuming dbconnect.execute executes the SQL query
+        dbconnect.update(q, values)  
         messagebox.showinfo("Success", "Package information updated successfully!")
+        # edit_window.destroy()
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred while updating package information: {str(e)}")
 

@@ -32,6 +32,12 @@ def back_to_admin():
 def logout():
     packages_window.destroy()  # Close the packages window
     subprocess.run(["python", "main.py"])  # Return to main.py using subprocess
+def view_packages(username):
+    # Create the view packages window
+    viewpackages.view_packages(username)
+
+    # Destroy the current packages_window when the "View Packages" button is clicked
+    packages_window.destroy()
 
 # Function to add a new package to the database
 def add_package():

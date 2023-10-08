@@ -23,10 +23,10 @@ def update(q, values):
     c.close()
     return result
 
-def delete(q):
+def delete(q, values):
     c = mc.connect(user="root", password=password, host="localhost", database=database)
     cur = c.cursor(dictionary=True)
-    cur.execute(q)
+    cur.execute(q, values)
     c.commit()
     result = cur.rowcount
     c.close()
