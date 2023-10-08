@@ -40,6 +40,7 @@ def dblogin():
 
 # Function to open the registration window
 def register_customer():
+    
     window.destroy()  # Close the main login window
     # Run register.py using subprocess
     subprocess.run(["python", "registercustomer.py"])

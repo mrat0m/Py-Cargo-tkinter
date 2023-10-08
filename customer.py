@@ -37,8 +37,8 @@ def create_window(window_name, title, size):
     return new_window
 
 # Function to create a "Home" button in a window
-def create_home_button(window):
-    home_button = tk.Button(window, text="Home", command=lambda w=window: go_to_customer_window(w))
+def create_home_button(window, customer_window):
+    home_button = tk.Button(window, text="Home", command=lambda w=window: go_to_customer_window(w, customer_window))
     home_button.pack(side="bottom", pady=10)
 
 # Modify the go_to_customer_window function to accept two arguments
@@ -55,7 +55,7 @@ def update_booking_status(booking_id, new_status):
 
 # Function to fetch and display package details
 def fetch_package_details():
-    package_details_window = create_window("package_details_window", "Package Details", "400x400")
+    package_details_window = create_window("package_details_window", "Package Details", "600x600")
 
     # Add a stylish heading
     heading_label = tk.Label(package_details_window, text="Quick Cargo", font=("Helvetica", 20, "bold"))
@@ -70,7 +70,7 @@ def fetch_package_details():
     logout_button.pack(side="right", padx=10, pady=5)
 
     # Create a "Home" button on the top-right corner next to the logout button
-    home_button = tk.Button(top_frame, text="Home", command=lambda: go_to_customer_window(package_details_window))
+    home_button = tk.Button(package_details_window, text="Home", command=lambda w=package_details_window: go_to_customer_window(w, customer_window))
     home_button.pack(side="right", padx=10, pady=5)
 
     # Display the username at the top-left corner
@@ -130,7 +130,7 @@ def book_package(pack_id, packname, parent_window):
     parent_window.withdraw()  # Hide the parent window
 
     book_package_window = create_window("book_package_window", "Book Package", "400x300")
-    create_home_button(book_package_window)  # Add a "Home" button to this window
+    create_home_button(book_package_window, customer_window)  # Add a "Home" button to this window
 
     tk.Label(book_package_window, text=f"Selected Package: {packname}").pack(pady=5)
 
@@ -180,7 +180,7 @@ def book_package(pack_id, packname, parent_window):
 
     def create_payment_window(amount, booking_id, parent_window):
         payment_window = create_window("payment_window", "Card Payment", "500x400")
-        create_home_button(payment_window)  # Add a "Home" button to this window
+        create_home_button(payment_window,customer_window)  # Add a "Home" button to this window
 
         tk.Label(payment_window, text=f"Amount to Pay: ₹{amount}/-").pack(pady=5)
 
@@ -230,7 +230,7 @@ def book_package(pack_id, packname, parent_window):
 # Function to view bookings
 def view_bookings():
     bookings_window = create_window("bookings_window", "My Bookings", "1000x500")
-    create_home_button(bookings_window)  # Add a "Home" button to this window
+    create_home_button(bookings_window, customer_window)  # Add a "Home" button to this window
 
     q = "SELECT * FROM bookings WHERE customer_id = %s"
     customer_id = dbconnect.get_customer_id(username)
