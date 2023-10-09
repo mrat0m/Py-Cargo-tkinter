@@ -24,12 +24,9 @@ def view_all_bookings():
     total = 0
 
     if res:
-        # Create a new window for displaying bookings
-        bookings_window = tk.Toplevel(all_bookings_window)
-        bookings_window.title("All Bookings")
 
         # Create a Treeview widget
-        tree = ttk.Treeview(bookings_window)
+        tree = ttk.Treeview(all_bookings_window)
         tree.pack(pady=10)
 
         # Define columns and headings
@@ -47,11 +44,31 @@ def view_all_bookings():
         tree.heading("pack_id", text="Package ID")
 
         # Create horizontal scrollbar
-        hsb = ttk.Scrollbar(bookings_window, orient="horizontal", command=tree.xview)
+        hsb = ttk.Scrollbar(all_bookings_window, orient="horizontal", command=tree.xview)
         hsb.pack(side="bottom", fill="x")
+
+        # Create horizontal scrollbar
+        vsb = ttk.Scrollbar(all_bookings_window, orient="vertical", command=tree.yview)
+        vsb.pack(side="right", fill="y")
+
+        # Set the width of columns
+        tree.column("#0", width=0, stretch=tk.NO)  # Hide the first column
+        tree.column("booking_id", width=80) 
+        tree.column("customer_id", width=80)
+        tree.column("booking_date", width=120)
+        tree.column("from_loc", width=85)  
+        tree.column("toloc", width=80)
+        tree.column("weight", width=50)
+        tree.column("length", width=50)
+        tree.column("width", width=50)
+        tree.column("amount", width=60)
+        tree.column("booking_status", width=90)
+        tree.column("pack_id", width=70)
 
         # Configure the treeview to use the horizontal scrollbar
         tree.configure(xscrollcommand=hsb.set)
+        # Configure the treeview to use the vertical scrollbar
+        tree.configure(yscrollcommand=vsb.set)
         
         # Add data to the Treeview
         for booking_data in res:
@@ -66,10 +83,12 @@ def view_all_bookings():
             amount = int(booking_data['amount'])
             booking_status = booking_data['booking_status']
             pack_id = booking_data['pack_id']
-            if booking_data['booking_status'] == "Paid" or booking_data['booking_status'] =="Booked":
+            
+            if booking_data['booking_status'] == "Paid" or booking_data['booking_status'] =="Booked" or booking_data['booking_status'] == "collected":
                 total = total + amount
-
+            
             tree.insert("", "end", values=(booking_id, customer_id, booking_date, from_loc, toloc, weight, length, width, amount, booking_status, pack_id))
+
 
         total_label = tk.Label(header_frame, font=("Helvetica", 20, "bold"), text=f"Total= ₹{total}/-")
         total_label.pack(side="right", padx=10)
@@ -79,7 +98,7 @@ all_bookings_window = tk.Tk()
 all_bookings_window.title("Quick Cargo | All Bookings")
 
 # Set window size
-all_bookings_window.geometry("1200x600")  # Width x Height
+all_bookings_window.geometry("1000x500")  # Width x Height
 
 # Add a stylish heading
 quick_cargo_label = tk.Label(all_bookings_window, text="Quick Cargo",
@@ -101,9 +120,6 @@ logout_button.pack(side="right", padx=10)
 heading_label = tk.Label(all_bookings_window, text="All Bookings", font=("Helvetica", 16, "bold"))
 heading_label.pack()
 
-# Automatically run the view_all_bookings function
-view_all_bookings()
-
 # Create a frame for the buttons (bottom row)
 buttons_frame = tk.Frame(all_bookings_window)
 buttons_frame.pack(side="bottom", fill="x", pady=10)
@@ -112,9 +128,12 @@ buttons_frame.pack(side="bottom", fill="x", pady=10)
 back_button = tk.Button(buttons_frame, text="Back to Admin", command=back_to_admin)
 back_button.pack(side="left", padx=10)
 
-view_all_bookings_button = tk.Button(
-    buttons_frame, text="View All Bookings", command=view_all_bookings)
-view_all_bookings_button.pack(side="right", padx=10)
+# view_all_bookings_button = tk.Button(
+#     buttons_frame, text="View All Bookings", command=view_all_bookings)
+# view_all_bookings_button.pack(side="right", padx=10)
+
+# Automatically run the view_all_bookings function
+view_all_bookings()
 
 # Start the GUI event loop for the all bookings window
 all_bookings_window.mainloop()
