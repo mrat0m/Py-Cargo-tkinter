@@ -66,6 +66,7 @@ def add_package():
         max_weight_entry.delete(0, tk.END)
         max_height_entry.delete(0, tk.END)
         max_width_entry.delete(0, tk.END)
+        min_price_entry.delete(0, tk.END)
 
 # Create the Packages GUI window
 packages_window = tk.Tk()

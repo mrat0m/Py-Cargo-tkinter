@@ -239,18 +239,39 @@ def view_bookings():
     frame = tk.Frame(bookings_window)
     frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-    tree = ttk.Treeview(frame, columns=("booking_id", "booking_date", "from_loc", "toloc", "weight", "amount", "booking_status"))
+    tree = ttk.Treeview(frame, columns=("booking_id", "booking_date", "from_loc", "toloc", "weight", "length", "width", "amount", "booking_status"))
     tree.heading("booking_id", text="Booking ID")
     tree.heading("booking_date", text="Booking Date")
     tree.heading("from_loc", text="From Location")
     tree.heading("toloc", text="To Location")
     tree.heading("weight", text="Weight")
+    tree.heading("length", text="Length")
+    tree.heading("width", text="Width")
     tree.heading("amount", text="Amount")
     tree.heading("booking_status", text="Status")
 
     tree.column("#0", width=0, stretch=tk.NO)  # Hide the first column
+    tree.column("booking_id", width=80) 
+    tree.column("booking_date", width=120)
+    tree.column("from_loc", width=85)  
+    tree.column("toloc", width=80)
+    tree.column("weight", width=50)
+    tree.column("length", width=50)
+    tree.column("width", width=50)
+    tree.column("amount", width=60)
+    tree.column("booking_status", width=90)
 
+    # Create horizontal scrollbar
+    hsb = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    hsb.pack(side="bottom", fill="x")
+
+    # Create horizontal scrollbar
     vsb = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    vsb.pack(side="right", fill="y")
+
+    # Configure the treeview to use the horizontal scrollbar
+    tree.configure(xscrollcommand=hsb.set)
+        # Configure the treeview to use the vertical scrollbar
     tree.configure(yscrollcommand=vsb.set)
 
     # Add data to the Treeview
@@ -259,11 +280,14 @@ def view_bookings():
         booking_date = booking["booking_date"]
         from_loc = booking["from_loc"]
         toloc = booking["toloc"]
+        length = booking["length"]
         weight = booking["weight"]
+        width = booking["width"]
         amount = booking["amount"]
         booking_status = booking["booking_status"]
 
-        tree.insert("", "end", values=(booking_id, booking_date, from_loc, toloc, weight, amount, booking_status))
+        if booking['booking_status'] !="Processing":
+            tree.insert("", "end", values=(booking_id, booking_date, from_loc, toloc, weight, length, width, amount, booking_status))
 
     # Pack the Treeview and scrollbar
     tree.pack(side="left", fill="both", expand=True)
